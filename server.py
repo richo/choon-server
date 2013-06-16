@@ -38,7 +38,7 @@ def handle_register(data, conn):
 
 def handle_http(data):
     try:
-        verb, path, http = data.split(" ")
+        verb, path, http = data.split(" ", 2)
         _, pebble_id, action = path.split("/")
         byte = action[0]
         for conn in register[pebble_id]:
