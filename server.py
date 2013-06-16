@@ -71,7 +71,7 @@ def main(argv):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    sock.bind(("127.0.0.1", port))
+    sock.bind(("0.0.0.0", port))
     logging.info("Bound socket on port: %i" % (port))
     sock.listen(16)
 
