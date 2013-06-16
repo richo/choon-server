@@ -39,7 +39,7 @@ def handle_register(data, conn):
 def get_pebble_from_http(data):
     for line in data.split("\n"):
         if line.startswith("X-PEBBLE-ID:"):
-            return line.split(" ", 1)[1].strip()
+            return line.split(" ", 1)[1].strip().replace(":", "")
     return None
 
 
