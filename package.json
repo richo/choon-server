@@ -1,7 +1,0 @@
-{
-  "name": "choon-server",
-  "version": "0.0.0",
-  "dependencies": {
-    "socket.io": "~0.9.16"
-  }
-}
