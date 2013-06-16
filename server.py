@@ -66,6 +66,8 @@ def handle_incoming(data, conn):
 def main(argv):
     if len(argv) > 1:
         port = int(argv[1])
+    elif "PORT" in os.environ:
+        port = int(os.getenv("PORT"))
     else:
         port = 4949
 
