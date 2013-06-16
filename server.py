@@ -2,6 +2,7 @@
 
 import os
 import sys
+import errno
 import socket
 import logging
 import select
@@ -10,6 +11,7 @@ from collections import defaultdict
 
 peers = []
 register = defaultdict(list)
+reverse_register = defaultdict(list)
 
 
 def terminate(conn):
@@ -18,9 +20,19 @@ def terminate(conn):
     peers.pop(peers.index(conn))
 
 
+def handle_disconnect(conn):
+    for pebble_id in reverse_register[conn]:
+        idx = register[pebble_id]
+        idx.pop(idx.index(conn))
+    # XXX Pretty sure this leaks
+    if conn in peers:
+        peers.pop(peers.index(conn))
+
+
 def handle_register(data, conn):
     pebble_id = data.split(" ")[1]
     register[pebble_id].append(conn)
+    reverse_register[conn].append(pebble_id)
     logging.warn("Registered %s" % pebble_id)
 
 
@@ -30,7 +42,13 @@ def handle_http(data):
         _, pebble_id, action = path.split("/")
         byte = action[0]
         for conn in register[pebble_id]:
-            conn.send(byte)
+            try:
+                conn.send(byte)
+            except socket.error as e:
+                if e.errno == errno.EBADF:
+                    handle_disconnect(conn)
+                else:
+                    raise
     except:
         raise
 
@@ -66,7 +84,7 @@ def main(argv):
                 logging.info("Accepted connection from: %s:%i" % peer)
                 peers.append(conn)
             else:
-                data = i.recv(1024)
+                data = i.recv(1024).strip()
                 print ">>> %s" % data
                 handle_incoming(data, i)
 
