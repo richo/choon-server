@@ -36,11 +36,20 @@ def handle_register(data, conn):
     logging.warn("Registered %s" % pebble_id)
 
 
+def get_pebble_from_http(data):
+    for line in data.split("\n"):
+        if line.startswith("X-PEBBLE-ID:"):
+            return line.split(" ", 1)[1].strip()
+    return None
+
+
 def handle_http(data):
     try:
         verb, path, http = data.split(" ", 2)
         _, pebble_id, action = path.split("/")
         byte = action[0]
+        # Can't actually get at the serial, we use it from the http data.
+        pebble_id = get_pebble_from_http(data) or pebble_id
         for conn in register[pebble_id]:
             try:
                 conn.send(byte)
